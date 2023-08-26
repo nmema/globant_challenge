@@ -1,0 +1,126 @@
+---
+repos:
+  - repo: https://github.com/psf/black
+    rev: 22.3.0
+    hooks:
+      - id: black
+        name: black
+        entry: poetry run black
+        language: python
+        types: [python]
+        exclude: (data|docs/)
+        args:  # arguments to configure black
+          - --line-length=88
+          - --skip-string-normalization
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        name: isort
+        entry: poetry run isort
+        language: python
+        types: [python]
+        exclude: (data|docs/)
+        args:
+          - --profile=black
+          - --multi-line=3
+          - --line-length=88
+          - --trailing-comma
+
+  - repo: local
+    hooks:
+      - id: pylint
+        name: pylint
+        entry: poetry run pylint
+        language: python
+        types: [python]
+        exclude: (data|docs/)
+        args:
+          - --max-line-length=88
+          - --disable=logging-fstring-interpolation
+          - --extension-pkg-whitelist=pydantic
+
+  - repo: local
+    hooks:
+      - id: jupyter-nb-clear-output
+        name: jupyter-nb-clear-output
+        files: \.ipynb$
+        stages: [commit]
+        language: system
+        entry: |
+          poetry run python
+          -m nbconvert
+          --ClearOutputPreprocessor.enabled=True
+          --inplace
+
+  - repo: https://github.com/PyCQA/flake8
+    rev: 4.0.1
+    hooks:
+      - id: flake8
+        name: flake8
+        entry: poetry run flake8
+        language: python
+        types: [python]
+        exclude: (data|docs/)
+        additional_dependencies: [
+          "flake8-bugbear",
+          "flake8-comprehensions",
+          "flake8-mutable",
+          "flake8-print",
+          "flake8-simplify",
+          "flake8-docstrings",
+          "pandas-vet",
+        ]
+        args:  # arguments to configure flake8
+          # making flake8 line length compatible with black
+          - "--max-line-length=88"
+          - "--max-complexity=10"
+
+          # these are errors that will be ignored by flake8
+          # check out their meaning here
+          # https://flake8.pycqa.org/en/latest/user/error-codes.html
+          - "--ignore=E501,W503,E203"
+
+  - repo: https://github.com/pycqa/bandit
+    rev: 1.7.4
+    hooks:
+      - id: bandit
+        exclude: (data|docs/)
+        args: ['-iii', '-ll']
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.3.0
+    hooks:
+      - id: check-docstring-first
+        exclude: (data|docs/)
+      - id: check-added-large-files
+        exclude: (data|docs/)
+      - id: detect-private-key
+        exclude: (data|docs/)
+      - id: end-of-file-fixer
+        exclude: (data|docs/)
+      - id: no-commit-to-branch
+        exclude: (data|docs/)
+      - id: check-merge-conflict
+        exclude: (data|docs/)
+      - id: trailing-whitespace
+        exclude: (data|docs/)
+      - id: check-yaml
+        exclude: (data|docs/)
+      - id: check-ast
+        exclude: (data|docs/)
+      - id: debug-statements
+        exclude: (data|docs/)
+      - id: mixed-line-ending
+        exclude: (data|docs/)
+
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.26.3
+    hooks:
+      - id: yamllint
+        name: yamllint
+        description: This hook runs yamllint.
+        entry: poetry run yamllint
+        language: python
+        types: [file, yaml]
