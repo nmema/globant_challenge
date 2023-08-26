@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "globant-challenge"
+version = "0.1.0"
+description = "Globant's Data Engineer Challenge"
+authors = ["nmema <nicolas.a.mema@gmail.com>"]
+readme = "README.md"
+packages = [{include = "source"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^3.3.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
