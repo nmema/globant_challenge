@@ -43,5 +43,9 @@ def upload_from_s3(table_id: str, s3_path: str) -> dict:
     # pylint: disable=line-too-long
     query = f"insert into csv.{table_id} ({', '.join([column[0] for column in query_results])}) values ({('%s,' * len(query_results))[:-1]})"
     cur.executemany(query, data)
+    conn.commit()
+
+    cur.close()
+    conn.close()
 
     return {200: 'OK'}
