@@ -1,6 +1,8 @@
 """This module contains methos for the upload endpoint."""
-from aws_helpers import rds_get_conn, s3_get_content
+from aws_helpers import s3_get_content
+from db import insert_rows
 from fastapi import APIRouter
+from models import DeparmentsList, HiredEmployeesList, JobsList
 
 upload_router = APIRouter(
     tags=['upload'], prefix='/upload', responses={200: {'description': 'OK'}}
@@ -23,29 +25,107 @@ def upload_from_s3(table_id: str, s3_path: str) -> dict:
     dict
         Status of the request.
     """
-    data = s3_get_content(s3_url=s3_path)
+    records = s3_get_content(s3_url=s3_path)
 
-    conn = rds_get_conn()
-    cur = conn.cursor()
+    try:
+        insert_rows(
+            table_id=table_id,
+            records=records,
+        )
+    except Exception as error:  # pylint: disable=W0718
+        return {'Error': error}
 
-    query = f"""
-        select column_name
-        from information_schema.columns
-        where
-            table_schema = 'csv'
-            and table_name   = '{table_id}'
-        order by ordinal_position
+    return {200: 'OK'}
+
+
+@upload_router.post('/batch/jobs')
+def batch_jobs(data: JobsList) -> dict:
+    """Upload records to the jobs table on AWS RDS.
+
+    Parameters
+    ----------
+    data : JobList
+        Content to upload.
+
+    Returns
+    -------
+    dict
+        Status of the request.
     """
+    rows = data.data
 
-    cur.execute(query)
-    query_results = cur.fetchall()
+    records = []
+    for row in rows:
+        records.append((row.id, row.job))
 
-    # pylint: disable=line-too-long
-    query = f"insert into csv.{table_id} ({', '.join([column[0] for column in query_results])}) values ({('%s,' * len(query_results))[:-1]})"
-    cur.executemany(query, data)
-    conn.commit()
+    try:
+        insert_rows(
+            table_id='jobs',
+            records=records,
+        )
+    except Exception as error:  # pylint: disable=W0718
+        return {'Error': error}
 
-    cur.close()
-    conn.close()
+    return {200: 'OK'}
+
+
+@upload_router.post('/batch/departments')
+def batch_departments(data: DeparmentsList) -> dict:
+    """Upload records to the departments table on AWS RDS.
+
+    Parameters
+    ----------
+    data : DeparmentsList
+        Content to upload.
+
+    Returns
+    -------
+    dict
+        Status of the request.
+    """
+    rows = data.data
+
+    records = []
+    for row in rows:
+        records.append((row.id, row.department))
+
+    try:
+        insert_rows(
+            table_id='departments',
+            records=records,
+        )
+    except Exception as error:  # pylint: disable=W0718
+        return {'Error': error}
+
+    return {200: 'OK'}
+
+
+@upload_router.post('/batch/hired_employees')
+def batch_hiredemployees(data: HiredEmployeesList) -> dict:
+    """Upload records to the hired_employees table on AWS RDS.
+
+    Parameters
+    ----------
+    data : HiredEmployeesList
+        Content to upload.
+
+    Returns
+    -------
+    dict
+        Status of the request.
+    """
+    rows = data.data
+
+    records = []
+    for row in rows:
+        records.append((row.id, row.name, row.datetime, row.department_id, row.job_id))
+
+    try:
+        insert_rows(
+            table_id='hired_employees',
+            records=records,
+        )
+    except Exception as error:  # pylint: disable=W0718
+        return {'Error': error}
 
     return {200: 'OK'}
