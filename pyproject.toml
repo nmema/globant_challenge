@@ -25,6 +25,7 @@ fastapi = "^0.102.0"
 uvicorn = {extras = ["standard"], version = "^0.23.2"}
 boto3 = "^1.28.36"
 psycopg2-binary = "^2.9.7"
+pandas = "^2.1.0"
 
 [build-system]
 requires = ["poetry-core"]
