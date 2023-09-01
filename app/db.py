@@ -85,6 +85,8 @@ def get_employees_hired_by_quarter_2021() -> str:
 
     dataframe = pd.read_sql(query, con=conn)
 
+    conn.close()
+
     return dataframe.to_csv(index=False)
 
 
@@ -130,5 +132,7 @@ def get_employees_hired_above_mean_2021() -> str:
     """
 
     dataframe = pd.read_sql(query, con=conn)
+
+    conn.close()
 
     return dataframe.to_csv(index=False)
