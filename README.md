@@ -8,7 +8,7 @@
 
 ## Process
 
-1. I used a Amazon RDS for Postgresql to create the tables used in the challege.
+1. I used a Amazon RDS for Postgresql to create the tables used in the challenge.
 2. I created the secrets such as the database parameters using AWS Secrets Manager.
 3. Once a development was ready to test it out, I created and image using `docker build -t <tag> .` and uploaded it to ECR. [This guide](https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html) was helpful to achieve it.
 4. I used ECS to launch Fargate, creating a Task Definition and the running a service on a cluster.
